@@ -45,8 +45,8 @@ def test(request):
     chartresult = chartModel.objects.all()
     profileresult = profileModel.objects.all()
     serializer = ChartSerializers(chartresult,many=True) 
-    print(chartresult)
-    print(serializer.data)
+    #print(chartresult)
+    #print(serializer.data)
     return Response(serializer.data,status=status.HTTP_200_OK)
 @api_view(['GET','POST'])
 def profile(request):
@@ -71,33 +71,34 @@ def chart(request):
         serializer = ChartSerializers(result,many=True)
         return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
     elif request.method == 'POST':
-        name = request.POST['name']
-        day = request.POST['day']
+        name = request.data.get('name')
+        day = request.data.get('day')
         resultset = chartModel.objects.filter(name=name,day=day)
-        print(len(resultset))
+        #print(len(resultset))
         if (len(resultset) > 0):
             return Response(status=status.HTTP_208_ALREADY_REPORTED)
+        #print('return didnt work')
         serializer = ChartSerializers(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == "PUT":
-        name = request.POST['name']
-        day = request.POST['day']
-        resultset = chartModel.objects.filter(name=name,day=day) 
-        print(resultset)
-        serializer = ChartSerializers(resultset, data=request.data, many=True)
+        name = request.data.get('name')
+        day = request.data.get('day')
+        resultset = chartModel.objects.get(name=name,day=day) 
+        #print(resultset)
+        serializer = ChartSerializers(resultset, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
-        print(request.POST)
-        name = request.POST['name']
-        day = request.POST['day']
+        name = request.data.get('name')
+        day = request.data.get('day')
         resultset = chartModel.objects.get(name=name,day=day)
-        print (resultset)
+        #print (resultset)
+        resultset.delete()
         return Response(status=status.HTTP_201_CREATED)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
